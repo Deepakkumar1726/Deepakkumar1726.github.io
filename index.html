@@ -415,8 +415,8 @@ function setPhoto(src){
   $("#rmBtn").hidden=!src;
 }
 let saved=null;try{saved=localStorage.getItem(KEY)}catch(e){}
-setPhoto(saved);
-$("#upBtn").onclick=()=>$("#file").click();
+setPhoto(saved || "profile.jpg.png");
+  $("#upBtn").onclick=()=>$("#file").click();
 $("#file").onchange=ev=>{
   const f=ev.target.files[0];if(!f||!f.type.startsWith("image/"))return;
   const r=new FileReader();
