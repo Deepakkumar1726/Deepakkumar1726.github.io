@@ -199,14 +199,17 @@ footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:v
 </div>
 <div class="socials"><a id="gh" target="_blank" rel="noopener">GitHub ↗</a><a id="li" target="_blank" rel="noopener">LinkedIn ↗</a></div>
 </div>
+<div class="ring">
+  <div class="in">
+    <img src="profile.jpg.png" alt="DEEPAKKUMAR S Profile Photo">
+  </div>
 <div class="photo-col reveal">
-<div class="ring"><div class="in" id="avatar"></div></div>
-<div class="pbtns">
-<button class="btn sm" id="upBtn">⬆ Upload Photo</button>
-<button class="btn sm" id="rmBtn" hidden>Remove Photo</button>
-</div>
-<input type="file" id="file" accept="image/*" hidden aria-label="Upload profile photo">
-<span class="note">Your photo is stored only in this browser.</span>
+  <div class="ring">
+    <div class="in">
+      <img src="profile.jpg.png"
+           alt="DEEPAKKUMAR S Profile Photo">
+    </div>
+  </div>
 </div>
 </div></section>
 
@@ -416,7 +419,7 @@ function setPhoto(src){
 }
 let saved=null;try{saved=localStorage.getItem(KEY)}catch(e){}
 setPhoto(saved || "profile.jpg.png");
-  $("#upBtn").onclick=()=>$("#file").click();
+$("#upBtn").onclick=()=>$("#file").click();
 $("#file").onchange=ev=>{
   const f=ev.target.files[0];if(!f||!f.type.startsWith("image/"))return;
   const r=new FileReader();
@@ -426,7 +429,16 @@ $("#file").onchange=ev=>{
     const d=c.toDataURL("image/jpeg",.88);setPhoto(d);try{localStorage.setItem(KEY,d)}catch(e){}
   };im.src=r.result};r.readAsDataURL(f);ev.target.value="";
 };
-$("#rmBtn").onclick=()=>{setPhoto(null);try{localStorage.removeItem(KEY)}catch(e){}};
+/* Permanent Profile Photo */
+const avatar = document.querySelector(".ring .in");
+
+avatar.innerHTML = `
+  <img
+    src="profile.jpg.png"
+    alt="DEEPAKKUMAR S Profile Photo"
+    style="width:100%;height:100%;object-fit:cover;"
+  >
+`;
 
 /* education */
 $("#bars").innerHTML=CONFIG.semesters.map(([n,v])=>'<div class="bar"><div class="row"><span>'+n+'</span><b>'+v.toFixed(2)+'</b></div><div class="track"><div class="fill" data-w="'+(v*10)+'"></div></div></div>').join("");
