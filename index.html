@@ -45,8 +45,33 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .socials{display:flex;gap:14px;color:var(--mu);font-size:.9rem}
 .socials a:hover{color:var(--tx)}
 .photo-col{display:flex;flex-direction:column;align-items:center;gap:14px}
-.ring{position:relative;width:min(300px,70vw);aspect-ratio:1;border-radius:50%;padding:4px;background:conic-gradient(from 0deg,var(--b),var(--v),var(--b));animation:spin 8s linear infinite;box-shadow:0 0 70px #6d5cf044}
-.ring .in{width:100%;height:100%;border-radius:50%;background:#0b0b12;overflow:hidden;animation:spin 8s linear infinite reverse;display:grid;place-items:center}
+.ring{
+  position:relative;
+  width:min(300px,70vw);
+  aspect-ratio:1;
+  border-radius:50%;
+  padding:4px;
+  background:linear-gradient(135deg,var(--b),var(--v));
+  box-shadow:0 0 40px #6d5cf044;
+  animation:none;
+}
+
+.ring .in{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:#0b0b12;
+  overflow:hidden;
+  animation:none;
+}
+
+.ring img,
+.ring svg{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  animation:none;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ring img,.ring svg{width:100%;height:100%;object-fit:cover}
 .pbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -173,7 +198,18 @@ footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:v
   }
 }
 
+/* Fix: Make all portfolio content visible */
+.reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+}
 
+.reveal.show {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+}
 </style>
 </head>
 <body>
@@ -199,17 +235,13 @@ footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:v
 </div>
 <div class="socials"><a id="gh" target="_blank" rel="noopener">GitHub ↗</a><a id="li" target="_blank" rel="noopener">LinkedIn ↗</a></div>
 </div>
-<div class="ring">
-  <div class="in">
-    <img src="profile.jpg.png" alt="DEEPAKKUMAR S Profile Photo">
-  </div>
+
 <div class="photo-col reveal">
   <div class="ring">
-    <div class="in">
-      <img src="profile.jpg.png"
-           alt="DEEPAKKUMAR S Profile Photo">
-    </div>
+    <div class="in" id="avatar"></div>
   </div>
+
+
 </div>
 </div></section>
 
@@ -413,32 +445,78 @@ $("#links").addEventListener("click",()=>$("#links").classList.remove("open"));
 /* avatar */
 const DEFAULT='<svg viewBox="0 0 200 200" role="img" aria-label="Default avatar"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e2a4a"/><stop offset="1" stop-color="#2a1f4d"/></linearGradient></defs><rect width="200" height="200" fill="url(#g)"/><circle cx="100" cy="78" r="36" fill="#6b72a8"/><path d="M30 200c0-44 31-72 70-72s70 28 70 72z" fill="#6b72a8"/></svg>';
 const KEY="portfolio-photo";
-function setPhoto(src){
-  $("#avatar").innerHTML=src?'<img alt="Profile photo of '+esc(CONFIG.name)+'" src="'+src+'">':DEFAULT;
-  $("#rmBtn").hidden=!src;
+function setPhoto(src) {
+    const avatar = $("#avatar");
+    const removeBtn = $("#rmBtn");
+
+    if (avatar) {
+        avatar.innerHTML = src
+            ? '<img alt="Profile photo of ' + esc(CONFIG.name) +
+              '" src="' + src + '">'
+            : DEFAULT;
+    }
+
+    if (removeBtn) {
+        removeBtn.hidden = !src;
+    }
 }
 let saved=null;try{saved=localStorage.getItem(KEY)}catch(e){}
 setPhoto(saved || "profile.jpg.png");
-$("#upBtn").onclick=()=>$("#file").click();
-$("#file").onchange=ev=>{
-  const f=ev.target.files[0];if(!f||!f.type.startsWith("image/"))return;
-  const r=new FileReader();
-  r.onload=()=>{const im=new Image();im.onload=()=>{
-    const s=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement("canvas");
-    c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);
-    const d=c.toDataURL("image/jpeg",.88);setPhoto(d);try{localStorage.setItem(KEY,d)}catch(e){}
-  };im.src=r.result};r.readAsDataURL(f);ev.target.value="";
-};
-/* Permanent Profile Photo */
-const avatar = document.querySelector(".ring .in");
+const uploadBtn = document.getElementById("upBtn");
+const fileInput = document.getElementById("file");
+const removeBtn = document.getElementById("rmBtn");
 
-avatar.innerHTML = `
-  <img
-    src="profile.jpg.png"
-    alt="DEEPAKKUMAR S Profile Photo"
-    style="width:100%;height:100%;object-fit:cover;"
-  >
-`;
+if (uploadBtn && fileInput) {
+    uploadBtn.onclick = () => fileInput.click();
+
+    fileInput.onchange = ev => {
+        const f = ev.target.files[0];
+        if (!f || !f.type.startsWith("image/")) return;
+
+        const r = new FileReader();
+
+        r.onload = () => {
+            const im = new Image();
+
+            im.onload = () => {
+                const s = Math.min(
+                    1,
+                    600 / Math.max(im.width, im.height)
+                );
+
+                const c = document.createElement("canvas");
+                c.width = im.width * s;
+                c.height = im.height * s;
+
+                c.getContext("2d").drawImage(
+                    im, 0, 0, c.width, c.height
+                );
+
+                const d = c.toDataURL("image/jpeg", 0.88);
+                setPhoto(d);
+
+                try {
+                    localStorage.setItem(KEY, d);
+                } catch (e) {}
+            };
+
+            im.src = r.result;
+        };
+
+        r.readAsDataURL(f);
+        ev.target.value = "";
+    };
+}
+
+if (removeBtn) {
+    removeBtn.onclick = () => {
+        setPhoto(null);
+        try {
+            localStorage.removeItem(KEY);
+        } catch (e) {}
+    };
+}
+/* Permanent Profile Photo */
 
 /* education */
 $("#bars").innerHTML=CONFIG.semesters.map(([n,v])=>'<div class="bar"><div class="row"><span>'+n+'</span><b>'+v.toFixed(2)+'</b></div><div class="track"><div class="fill" data-w="'+(v*10)+'"></div></div></div>').join("");
